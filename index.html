@@ -4,20 +4,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clínica Lumina · Tratamientos Faciales en Santiago</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
+  <!-- HEADER -->
+  <header>
+    <span class="logo">Lumina</span>
+    <nav>
+      <a href="#tratamientos">Tratamientos</a>
+      <a href="#formulario">Consulta gratuita</a>
+    </nav>
+  </header>
+
   <!-- HERO -->
   <section id="hero">
-    <h1>Recupera tu piel. Sin cirugía, sin tiempo perdido.</h1>
-    <p>Tratamientos faciales personalizados en Las Condes. HydraFacial, biorevitalización y peeling químico con resultados visibles desde la primera sesión.</p>
-    <a href="#formulario">Quiero mi consulta gratuita</a>
+    <div class="hero-inner">
+      <p class="hero-eyebrow">Las Condes · Santiago</p>
+      <h1>Recupera tu piel.<br><em>Sin cirugía,</em><br>sin tiempo perdido.</h1>
+      <p>Tratamientos faciales personalizados con resultados visibles desde la primera sesión.</p>
+      <a href="#formulario">Quiero mi consulta gratuita</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats">
+    <div class="stats-grid">
+      <div class="stat">
+        <span class="stat-num">+800</span>
+        <span class="stat-label">Pacientes atendidas</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">5</span>
+        <span class="stat-label">Años de experiencia</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">98%</span>
+        <span class="stat-label">Satisfacción comprobada</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">3</span>
+        <span class="stat-label">Tratamientos especializados</span>
+      </div>
+    </div>
   </section>
 
   <!-- BENEFICIOS -->
   <section id="beneficios">
-    <h2>¿Por qué elegir Clínica Lumina?</h2>
+    <p class="section-eyebrow">Por qué elegirnos</p>
+    <h2>Más que un tratamiento.<br><em>Una experiencia.</em></h2>
     <div class="beneficios-grid">
       <div class="beneficio">
         <h3>Resultados desde la primera sesión</h3>
@@ -34,36 +72,91 @@
     </div>
   </section>
 
+  <!-- TRATAMIENTOS -->
+  <section id="tratamientos">
+    <div class="tratamientos-header">
+      <p class="section-eyebrow">Nuestros tratamientos</p>
+      <h2>Lo que hacemos<br>por tu piel</h2>
+    </div>
+    <div class="tratamientos-lista">
+      <div class="tratamiento">
+        <div class="tratamiento-left">
+          <span class="tratamiento-num">01</span>
+          <h3>HydraFacial</h3>
+        </div>
+        <p>Limpieza profunda, extracción y hidratación en una sola sesión. Resultados inmediatos, sin dolor ni tiempo de recuperación.</p>
+      </div>
+      <div class="tratamiento">
+        <div class="tratamiento-left">
+          <span class="tratamiento-num">02</span>
+          <h3>Biorevitalización</h3>
+        </div>
+        <p>Microinyecciones de ácido hialurónico que restauran la hidratación y elasticidad desde el interior de la piel.</p>
+      </div>
+      <div class="tratamiento">
+        <div class="tratamiento-left">
+          <span class="tratamiento-num">03</span>
+          <h3>Peeling Químico</h3>
+        </div>
+        <p>Renovación celular controlada que elimina manchas, unifica el tono y afina la textura de manera visible.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- TESTIMONIO -->
   <section id="testimonio">
-    <blockquote>
-      "Llevaba años buscando algo que realmente funcionara. Después de dos sesiones de HydraFacial mi piel cambió completamente. Lo recomiendo sin dudarlo."
-    </blockquote>
-    <p>— Valentina R., 34 años, Santiago</p>
+    <div class="testimonio-inner">
+      <span class="quote-mark">"</span>
+      <blockquote>Llevaba años buscando algo que realmente funcionara. Después de dos sesiones de HydraFacial mi piel cambió completamente. Lo recomiendo sin dudarlo.</blockquote>
+      <p class="testimonio-autor">— Valentina R., 34 años · Santiago</p>
+    </div>
   </section>
 
   <!-- FORMULARIO -->
   <section id="formulario">
-    <h2>Agenda tu consulta gratuita</h2>
-    <p>Completa el formulario y te contactamos en menos de 24 horas.</p>
-    <form>
-      <input type="text" placeholder="Tu nombre completo" />
-      <input type="email" placeholder="Tu email" />
-      <input type="tel" placeholder="Tu teléfono" />
-      <select>
-        <option value="">¿Qué tratamiento te interesa?</option>
-        <option value="hydrafacial">HydraFacial</option>
-        <option value="biorevitalizacion">Biorevitalización</option>
-        <option value="peeling">Peeling Químico</option>
-        <option value="otro">No sé, quiero orientación</option>
-      </select>
-      <button type="submit">Quiero mi consulta gratuita</button>
-    </form>
+    <div class="formulario-inner">
+      <div class="formulario-copy">
+        <p class="section-eyebrow">Primer paso</p>
+        <h2>Agenda tu consulta gratuita</h2>
+        <p>Te contactamos en menos de 24 horas para coordinar tu evaluación sin costo ni compromiso.</p>
+        <ul class="form-trust">
+          <li>Sin costo ni compromiso</li>
+          <li>Atención personalizada</li>
+          <li>Respuesta en menos de 24h</li>
+        </ul>
+      </div>
+      <form>
+        <div class="campo">
+          <label for="nombre">Nombre completo</label>
+          <input id="nombre" type="text" placeholder="Ej. María González" />
+        </div>
+        <div class="campo">
+          <label for="email">Correo electrónico</label>
+          <input id="email" type="email" placeholder="tu@email.com" />
+        </div>
+        <div class="campo">
+          <label for="telefono">Teléfono</label>
+          <input id="telefono" type="tel" placeholder="+56 9 1234 5678" />
+        </div>
+        <div class="campo">
+          <label for="tratamiento">Tratamiento de interés</label>
+          <select id="tratamiento">
+            <option value="">Selecciona un tratamiento</option>
+            <option value="hydrafacial">HydraFacial</option>
+            <option value="biorevitalizacion">Biorevitalización</option>
+            <option value="peeling">Peeling Químico</option>
+            <option value="otro">No sé, quiero orientación</option>
+          </select>
+        </div>
+        <button type="submit">Quiero mi consulta gratuita</button>
+      </form>
+    </div>
   </section>
 
   <!-- FOOTER -->
   <footer>
     <p>Clínica Lumina · Las Condes, Santiago · contacto@clinicalumina.cl</p>
   </footer>
+
 </body>
 </html>
