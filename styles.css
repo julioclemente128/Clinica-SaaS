@@ -604,6 +604,63 @@ footer {
   }
 }
 
+/* ── FORM: ESTADOS ── */
+.campo-error {
+  font-size: 11px;
+  font-weight: 500;
+  color: #c0392b;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.form-exito {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 48px 0 0;
+  animation: fadeInUp 0.4s ease;
+}
+
+.exito-icono {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: #0c0c0c;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.form-exito h3 {
+  font-size: 24px;
+  color: #0c0c0c;
+  font-weight: 600;
+}
+
+.form-exito p {
+  font-size: 15px;
+  font-weight: 300;
+  color: #777777;
+  line-height: 1.75;
+  max-width: 340px;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── ACCESIBILIDAD ── */
 @media (prefers-reduced-motion: reduce) {
   * {
