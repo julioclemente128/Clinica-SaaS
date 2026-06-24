@@ -227,7 +227,7 @@ const tratamiento = document.getElementById('tratamiento').value;
       // Simulación de envío — reemplazar con fetch() cuando haya backend
 
 
-      fetch('/api/lead', {
+      fetch('https://clinica-saas-production-f678.up.railway.app/api/lead', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ nombre, email, telefono, tratamiento })
