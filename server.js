@@ -1,19 +1,32 @@
-// ── DEPENDENCIAS ──
 const express    = require('express');
 const cors       = require('cors');
+const helmet     = require('helmet');
+const rateLimit  = require('express-rate-limit');
+const he         = require('he');
+const path       = require('path');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-
-
-// ── INICIALIZAR APP ──
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// ── SEGURIDAD: cabeceras HTTP ──
+app.use(helmet());
+
+// ── SEGURIDAD: CORS solo para orígenes conocidos ──
+const allowedOrigins = [
+  'https://clinica-lumina.vercel.app',
+  'http://localhost:3000',
+];
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ['POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
+
 // ── MIDDLEWARES ──
-app.use(cors());
-app.use(express.json());
-app.use(express.static('.'));
+app.use(express.json({ limit: '4kb' }));
+app.use(express.static(path.join(__dirname, 'frontend')));
 
 // ── CONEXIÓN A SUPABASE ──
 const supabase = createClient(
@@ -25,9 +38,23 @@ const supabase = createClient(
 const { BrevoClient } = require('@getbrevo/brevo');
 const brevo = new BrevoClient({ apiKey: process.env.BREVO_API_KEY });
 
+// ── SEGURIDAD: rate limiting en el endpoint de leads ──
+const leadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: 'Demasiadas solicitudes. Intenta de nuevo en 15 minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// ── VALIDACIÓN ──
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_LEN = 200;
+const TRATAMIENTOS_PERMITIDOS = ['hydrafacial', 'biorevitalizacion', 'peeling', 'otro'];
+
 // ── FUNCIÓN: ENVIAR SECUENCIA DE 3 EMAILS ──
 async function enviarSecuenciaEmails(nombre, email, tratamiento) {
-
+  // nombre y tratamiento ya vienen sanitizados con he.encode()
   const emails = [
     {
       subject: `${nombre}, tu consulta en Clínica Lumina está confirmada`,
@@ -97,35 +124,50 @@ async function enviarSecuenciaEmails(nombre, email, tratamiento) {
     });
   }
 
-  console.log(`📧 Secuencia de 3 emails enviada a ${email}`);
+  console.log('📧 Secuencia de emails enviada');
 }
 
 // ── RUTA: RECIBIR LEAD DEL FORMULARIO ──
-app.post('/api/lead', async (req, res) => {
-  const { nombre, email, telefono, tratamiento } = req.body;
+app.post('/api/lead', leadLimiter, async (req, res) => {
+  const { nombre, email, telefono, tratamiento, website } = req.body;
 
-  if (!nombre || !email || !telefono || !tratamiento) {
-    return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+  // Honeypot: campo oculto que solo rellenan los bots
+  if (website) {
+    return res.status(200).json({ ok: true, mensaje: 'Lead guardado y emails enviados' });
   }
 
-  // Guardar en Supabase
+  if (!nombre || typeof nombre !== 'string' || nombre.trim().length === 0 || nombre.length > MAX_LEN) {
+    return res.status(400).json({ error: 'Nombre inválido' });
+  }
+  if (!email || !EMAIL_REGEX.test(email) || email.length > MAX_LEN) {
+    return res.status(400).json({ error: 'Email inválido' });
+  }
+  if (!telefono || typeof telefono !== 'string' || telefono.trim().length === 0 || telefono.length > 30) {
+    return res.status(400).json({ error: 'Teléfono inválido' });
+  }
+  if (!TRATAMIENTOS_PERMITIDOS.includes(tratamiento)) {
+    return res.status(400).json({ error: 'Tratamiento no válido' });
+  }
+
+  // Sanitizar antes de insertar en BD y embeber en HTML de emails
+  const safeNombre      = he.encode(nombre.trim());
+  const safeTratamiento = he.encode(tratamiento);
+
   const { data, error } = await supabase
     .from('leads')
-    .insert([{ nombre, email, telefono, tratamiento }]);
+    .insert([{ nombre: safeNombre, email, telefono: telefono.trim(), tratamiento }]);
 
   if (error) {
     console.error('Error Supabase:', error.message);
     return res.status(500).json({ error: 'Error al guardar el lead' });
   }
 
-  console.log('✅ Nuevo lead guardado:', nombre, email);
+  console.log('✅ Nuevo lead guardado');
 
-  // Enviar secuencia de emails
   try {
-    await enviarSecuenciaEmails(nombre, email, tratamiento);
+    await enviarSecuenciaEmails(safeNombre, email, safeTratamiento);
   } catch (emailError) {
     console.error('Error Brevo:', emailError.message);
-    // No falla la request si el email falla — el lead ya quedó guardado
   }
 
   res.status(200).json({ ok: true, mensaje: 'Lead guardado y emails enviados' });

@@ -148,6 +148,10 @@
             <option value="otro">No sé, quiero orientación</option>
           </select>
         </div>
+        <div class="campo" style="display:none" aria-hidden="true">
+          <label for="website">Sitio web</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
         <button type="submit">Quiero mi consulta gratuita</button>
       </form>
     </div>
@@ -227,10 +231,12 @@ const tratamiento = document.getElementById('tratamiento').value;
       // Simulación de envío — reemplazar con fetch() cuando haya backend
 
 
+      const website = document.getElementById('website').value;
+
       fetch('https://clinica-saas-production-f678.up.railway.app/api/lead', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ nombre, email, telefono, tratamiento })
+  body: JSON.stringify({ nombre, email, telefono, tratamiento, website })
 })
 .then(function(res) { return res.json(); })
 .then(function(data) {
