@@ -129,7 +129,7 @@ async function enviarSecuenciaEmails(nombre, email, tratamiento) {
 
 // ── RUTA: RECIBIR LEAD DEL FORMULARIO ──
 app.post('/api/lead', leadLimiter, async (req, res) => {
-  const { nombre, email, telefono, tratamiento, website } = req.body;
+  const { nombre, email, telefono, tratamiento, website, slug } = req.body; // 👈 agregamos slug
 
   // Honeypot: campo oculto que solo rellenan los bots
   if (website) {
@@ -149,13 +149,29 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
     return res.status(400).json({ error: 'Tratamiento no válido' });
   }
 
+  // 👇 NUEVO: validar que viene un slug
+  if (!slug || typeof slug !== 'string' || slug.trim().length === 0) {
+    return res.status(400).json({ error: 'Identificador de clínica requerido' });
+  }
+
+  // 👇 NUEVO: resolver slug -> clínica
+  const { data: clinic, error: clinicError } = await supabase
+    .from('clinics')
+    .select('id, name, owner_email, whatsapp_number')
+    .eq('slug', slug.trim())
+    .single();
+
+  if (clinicError || !clinic) {
+    return res.status(404).json({ error: 'Clínica no encontrada' });
+  }
+
   // Sanitizar antes de insertar en BD y embeber en HTML de emails
   const safeNombre      = he.encode(nombre.trim());
   const safeTratamiento = he.encode(tratamiento);
 
   const { data, error } = await supabase
     .from('leads')
-    .insert([{ nombre: safeNombre, email, telefono: telefono.trim(), tratamiento }]);
+    .insert([{ nombre: safeNombre, email, telefono: telefono.trim(), tratamiento, clinic_id: clinic.id }]); // 👈 agregamos clinic_id
 
   if (error) {
     console.error('Error Supabase:', error.message);
