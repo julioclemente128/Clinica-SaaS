@@ -127,6 +127,55 @@ async function enviarSecuenciaEmails(nombre, email, tratamiento) {
   console.log('📧 Secuencia de emails enviada');
 }
 
+// ── FUNCIÓN: NOTIFICAR A LA CLÍNICA (SPEED-TO-LEAD) ──
+async function notificarClinica(clinic, nombre, email, telefono, tratamiento) {
+  // Teléfono limpio para wa.me: solo dígitos (sin +, espacios ni guiones)
+  let telefonoLimpio = telefono.replace(/\D/g, '');
+  // Aseguramos el código de país de Chile: si no empieza con 56, se lo agregamos
+  if (!telefonoLimpio.startsWith('56')) {
+    telefonoLimpio = `56${telefonoLimpio}`;
+  }
+
+  // Mensaje pre-cargado para WhatsApp — texto plano, codificado para URL
+  const mensajeWhatsApp = `Hola ${nombre}, te contactamos de ${clinic.name} por tu consulta de ${tratamiento}`;
+  const linkWhatsApp = `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensajeWhatsApp)}`;
+
+  // Sanitizamos los datos del lead antes de embeberlos en el HTML del correo
+  const safeNombre      = he.encode(nombre);
+  const safeTratamiento = he.encode(tratamiento);
+  const safeTelefono    = he.encode(telefono);
+  const safeEmail       = he.encode(email);
+
+  const htmlContent = `
+    <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; color: #1a1a1a;">
+      <p style="font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: #999;">${he.encode(clinic.name)}</p>
+      <h1 style="font-size: 28px; font-weight: 600; margin: 24px 0 16px;">Nuevo lead 🎉</h1>
+      <p style="font-size: 16px; line-height: 1.8; color: #444;">
+        Acabas de recibir una nueva consulta. Respóndele cuanto antes — la velocidad de respuesta es lo que convierte.
+      </p>
+      <table style="font-size: 16px; line-height: 1.8; color: #444; margin: 24px 0; border-collapse: collapse;">
+        <tr><td style="padding-right: 16px; color: #999;">Nombre</td><td><strong>${safeNombre}</strong></td></tr>
+        <tr><td style="padding-right: 16px; color: #999;">Teléfono</td><td><strong>${safeTelefono}</strong></td></tr>
+        <tr><td style="padding-right: 16px; color: #999;">Email</td><td><strong>${safeEmail}</strong></td></tr>
+        <tr><td style="padding-right: 16px; color: #999;">Tratamiento</td><td><strong>${safeTratamiento}</strong></td></tr>
+      </table>
+      <a href="${linkWhatsApp}" style="display: inline-block; background: #25D366; color: #fff; text-decoration: none; font-family: Georgia, serif; font-size: 16px; font-weight: 600; padding: 14px 28px; border-radius: 8px; margin-top: 8px;">
+        Responder por WhatsApp
+      </a>
+      <p style="margin-top: 40px; font-size: 14px; color: #999;">— ${he.encode(clinic.name)}</p>
+    </div>
+  `;
+
+  await brevo.transactionalEmails.sendTransacEmail({
+    sender: { name: clinic.name, email: process.env.SENDER_EMAIL },
+    to: [{ email: clinic.owner_email, name: clinic.name }],
+    subject: `Nuevo lead: ${nombre} — ${tratamiento}`,
+    htmlContent
+  });
+
+  console.log(`📲 Notificación speed-to-lead enviada a ${clinic.owner_email}`);
+}
+
 // ── RUTA: RECIBIR LEAD DEL FORMULARIO ──
 app.post('/api/lead', leadLimiter, async (req, res) => {
   const { nombre, email, telefono, tratamiento, website, slug } = req.body; // 👈 agregamos slug
@@ -184,6 +233,14 @@ app.post('/api/lead', leadLimiter, async (req, res) => {
     await enviarSecuenciaEmails(safeNombre, email, safeTratamiento);
   } catch (emailError) {
     console.error('Error Brevo:', emailError.message);
+  }
+
+  // Notificación inmediata al dueño de la clínica (speed-to-lead).
+  // Va en su propio try/catch: si falla, no afecta la respuesta ni los emails al lead.
+  try {
+    await notificarClinica(clinic, nombre, email, telefono, tratamiento);
+  } catch (notifError) {
+    console.error('Error notificación clínica:', notifError.message);
   }
 
   res.status(200).json({ ok: true, mensaje: 'Lead guardado y emails enviados' });
